@@ -1,2 +1,2 @@
 # FormBuilder
-A helper to abstract the creation of Forms with Bootstrap support
+A helper to abstract the work with Forms (including validation) with Bootstrap support.
