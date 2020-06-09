@@ -38,6 +38,7 @@ $name = 'user';
 echo $userForm->open($name, $options);
 ```
 | Form Option | Description | Default Value |
+| --- | --- | --- |
 | `action` | URL submit the form data | `$_SERVER['REQUEST_URI']` |
 | `class` | Custom CSS classes to apply to Form tag | `needs-validation` |
 | `charset` | The charset of the form | `utf-8` |
@@ -49,6 +50,7 @@ echo $userForm->open($name, $options);
 echo $userForm->input($name, $options);
 ```
 | Field Option | Description | Default Value |
+| --- | --- | --- |
 | `type` | What input type shall apply to inputs? `text`,`password`,`url`,`number`,`email`,`textarea`,`checkbox`,`radio`,`select` | `string` |
 | `label` | Text to label a field, `string` or `false` to hide label | `string` |
 | `col` | Class for grid forms, ex: `md-6` will produce a class `col-md-6` | `string` |
