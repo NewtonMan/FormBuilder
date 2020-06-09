@@ -20,7 +20,7 @@ class Form {
     public function __construct($name, $options=[]) {
         $this->options = array_merge([
             'action' => $_SERVER['REQUEST_URI'],
-            'class' => ($this->type == 'inline' ? 'form-inline':null),
+            'class' => ($this->type == 'inline' ? 'form-inline':null) . ' needs-validation',
             'charset' => 'utf-8',
             'method' => 'post',
             'type' => 'normal',
@@ -49,11 +49,11 @@ class Form {
             $sEvents[] = "{$e}=\"{$v}\"";
         }
         $sEvents = ' '. implode(' ', $sEvents);
-        return "<form action=\"" . $this->options['action'] . "\" method=\"" . $this->options['method'] . "\" name=\"" . $this->options['name'] . "\" accept-charset=\"" . $this->options['charset'] . "\"{$sEvents}>";
+        return "<form action=\"" . $this->options['action'] . "\" method=\"" . $this->options['method'] . "\" name=\"" . $this->options['name'] . "\" accept-charset=\"" . $this->options['charset'] . "\"{$sEvents} novalidate>\n";
     }
     
     public function row(){
-        return '<div class="form-row">' . implode('', func_get_args()) . '</div>';
+        return '<div class="form-row">' . implode('', func_get_args()) . "</div>\n";
     }
     
     public function submit($value, $options=[]){
@@ -93,14 +93,14 @@ class Form {
                 $body[] = $value;
             }
         }
-        return "<fieldset>"
-                . "<legend>{$title}</legend>"
-                . implode('', $body)
-                . "</fieldset>";
+        return "<fieldset>\n"
+                . "<legend>{$title}</legend>\n"
+                . implode("\n", $body)
+                . "</fieldset>\n";
     }
     
     public function close(){
-        return '</form>';
+        return "</form>\n";
     }
     
     public function input($name, $options=[]){

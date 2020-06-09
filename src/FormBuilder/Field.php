@@ -20,7 +20,16 @@ class Field {
         if (!isset($options['label'])) $options['label'] = ucfirst(strtolower($name));
         if (!isset($options['name'])) $options['name'] = "formdata[{$form->name}][{$name}]";
         if (!isset($options['required'])) $options['required'] = false;
-        if (strtolower($options['type'])=='text' || strtolower($options['type'])=='url' || strtolower($options['type'])=='number' || strtolower($options['type'])=='password' || strtolower($options['type'])=='email' || strtolower($options['type'])=='file'){
+        if ($options['required'] && !isset($options['invalid-feedback'])) {
+            $options['invalid-feedback'] = 'This is a required field.';
+        }
+        if (isset($options['prepend-icon'])) {
+            $options['prepend-text'] = "<i class=\"{$options['prepend-icon']}\"></i>";
+        }
+        if (isset($options['append-icon'])) {
+            $options['append-text'] = "<i class=\"{$options['append-icon']}\"></i>";
+        }
+        if (strtolower($options['type'])=='text' || strtolower($options['type'])=='textarea' || strtolower($options['type'])=='url' || strtolower($options['type'])=='number' || strtolower($options['type'])=='password' || strtolower($options['type'])=='email' || strtolower($options['type'])=='file'){
             $this->options = array_merge([
                 'class' => 'form-control' . (!empty($options['form-control-size']) ? " form-control-{$options['form-control-size']}":''),
                 'value' => (isset($this->data[$name]) ? $this->data[$name]:null),
@@ -48,7 +57,7 @@ class Field {
     }
     
     public function render(){
-        $iAttributes = ['label', 'inline', 'col', 'empty', 'options', 'required', 'form-control-size', 'help-text', 'valid-feedback', 'invalid-feedback'];
+        $iAttributes = ['label', 'inline', 'col', 'empty', 'options', 'required', 'form-control-size', 'help-text', 'valid-feedback', 'invalid-feedback', 'prepend-text', 'prepend-icon', 'append-text', 'append-icon'];
         switch ($this->options['type']) {
             case 'hidden':
                 return "<input type=\"hidden\" name=\"{$this->options['name']}\" value=\"{$this->options['value']}\">";
@@ -68,11 +77,15 @@ class Field {
                 if ($this->options['required']) $sAtributes[] = "required";
                 return '<div class="form-group' . 
                         (isset($this->options['col']) ? " col-{$this->options['col']}":'') . '">' . $this->getLabel() . 
+                        (!empty($this->options['prepend-text']) ? "<div class=\"input-group\"><div class=\"input-group-prepend\"><span class=\"input-group-text\" id=\"{$this->options['id']}PrependText\">{$this->options['prepend-text']}</span></div>":'') .
+                        (!empty($this->options['append-text']) ? "<div class=\"input-group\">":'') .
                         '<input ' . implode(' ', $sAtributes) . '>' . 
+                        (!empty($this->options['prepend-text']) ? "</div>":'') .
+                        (!empty($this->options['append-text']) ? "<div class=\"input-group-append\"><span class=\"input-group-text\" id=\"{$this->options['id']}AppendText\">{$this->options['append-text']}</span></div></div>":'') .
                         (!empty($this->options['help-text']) ? "<small id=\"{$this->options['id']}HelpText\" class=\"form-text text-muted\">{$this->options['help-text']}</small>":'') .
                         (!empty($this->options['valid-feedback']) ? "<div class=\"valid-feedback\">{$this->options['valid-feedback']}</div>":'') .
                         (!empty($this->options['invalid-feedback']) ? "<div class=\"invalid-feedback\">{$this->options['invalid-feedback']}</div>":'') .
-                        '</div>';
+                        "</div>\n";
                 break;
 
             case 'select':
@@ -91,7 +104,7 @@ class Field {
                 }
                 
                 return '<div class="form-group' . 
-                        (isset($this->options['col']) ? " col-{$this->options['col']}":'') . '" >' . $this->getLabel() . 
+                        (isset($this->options['col']) ? " col-{$this->options['col']}":'') . '">' . $this->getLabel() . 
                         '<select ' . implode(' ', $sAtributes) . '>' . 
                         ($this->options['empty']===false ? '':'<option value="">' . $this->options['empty'] . '</option>') . 
                         $options . 
@@ -99,7 +112,7 @@ class Field {
                         (!empty($this->options['help-text']) ? "<small id=\"{$this->options['id']}HelpText\" class=\"form-text text-muted\">{$this->options['help-text']}</small>":'') .
                         (!empty($this->options['valid-feedback']) ? "<div class=\"valid-feedback\">{$this->options['valid-feedback']}</div>":'') .
                         (!empty($this->options['invalid-feedback']) ? "<div class=\"invalid-feedback\">{$this->options['invalid-feedback']}</div>":'') .
-                        '</div>';
+                        "</div>\n";
                 break;
 
             case 'radio':
@@ -107,6 +120,7 @@ class Field {
                 $iAttributes[] = 'checked';
                 $iAttributes[] = 'selected';
                 $iAttributes[] = 'class';
+                $iAttributes[] = 'required';
                 $options = [];
                 if (is_array($this->options['options'])){
                     $i = 0;
@@ -124,12 +138,38 @@ class Field {
                         if ($iop['required']) $sAtributes[] = "required";
                         if ($iop['checked']) $sAtributes[] = "checked";
                         
-                        $options[] = "<div class=\"form-check\"><input " . implode(' ', $sAtributes) . "> <label class=\"form-check-label\" for=\"{$iop['id']}\">{$v}</label></div>";
+                        $options[] = "<div class=\"form-check\"><input class=\"form-check-input\" " . implode(' ', $sAtributes) . "> <label class=\"form-check-label\" for=\"{$iop['id']}\">{$v}</label>" . 
+                        (!empty($this->options['valid-feedback']) ? "<div class=\"valid-feedback\">{$this->options['valid-feedback']}</div>":'') .
+                        (!empty($this->options['invalid-feedback']) ? "<div class=\"invalid-feedback\">{$this->options['invalid-feedback']}</div>":'') . 
+                        "</div>";
                         $i++;
                     }
                 }
                 
-                return implode("", $options);
+                return '<div class="form-group' . 
+                        (isset($this->options['col']) ? " col-{$this->options['col']}":'') . '">' . $this->getLabel() . 
+                        implode("\n", $options) .
+                        (!empty($this->options['help-text']) ? "<small id=\"{$this->options['id']}HelpText\" class=\"form-text text-muted\">{$this->options['help-text']}</small>":'') .
+                        "</div>\n";
+                break;
+
+            case 'textarea':
+                $sAtributes = [];
+                foreach ($this->options as $k => $v) {
+                    if (in_array($k, $iAttributes)) continue;
+                    $sAtributes[] = "{$k}=\"{$v}\"";
+                }
+                if ($this->options['required']) $sAtributes[] = "required";
+                
+                return '<div class="form-group' . 
+                        (isset($this->options['col']) ? " col-{$this->options['col']}":'') . '">' . $this->getLabel() . 
+                        '<textarea ' . implode(' ', $sAtributes) . '>' . 
+                        $this->options['value'] . 
+                        '</textarea>' . 
+                        (!empty($this->options['help-text']) ? "<small id=\"{$this->options['id']}HelpText\" class=\"form-text text-muted\">{$this->options['help-text']}</small>":'') .
+                        (!empty($this->options['valid-feedback']) ? "<div class=\"valid-feedback\">{$this->options['valid-feedback']}</div>":'') .
+                        (!empty($this->options['invalid-feedback']) ? "<div class=\"invalid-feedback\">{$this->options['invalid-feedback']}</div>":'') .
+                        "</div>\n";
                 break;
 
             default:
