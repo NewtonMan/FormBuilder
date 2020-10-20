@@ -46,13 +46,13 @@ class Field {
                 'options' => [],
             ], $options);
         }
-        
         $this->name = $name;
         $this->label = $options['label'];
         $this->type = $options['type'];
     }
     
     public function getLabel(){
+        if ($this->options['inline'] && ($this->options['type'] == 'radio' || $this->options['type'] == 'checkbox')) return "<label for=\"{$this->options['id']}\" class=\"mr-2\">{$this->label}</label>";
         return "<label for=\"{$this->options['id']}\">{$this->label}</label>";
     }
     
@@ -137,8 +137,9 @@ class Field {
                         }
                         if ($iop['required']) $sAtributes[] = "required";
                         if ($iop['checked']) $sAtributes[] = "checked";
+                        if ($iop['inline']) $inline = 'form-check-inline';
                         
-                        $options[] = "<div class=\"form-check\"><input class=\"form-check-input\" " . implode(' ', $sAtributes) . "> <label class=\"form-check-label\" for=\"{$iop['id']}\">{$v}</label>" . 
+                        $options[] = "<div class=\"form-check {$inline}\"><input class=\"form-check-input\" " . implode(' ', $sAtributes) . "> <label class=\"form-check-label\" for=\"{$iop['id']}\">{$v}</label>" . 
                         (!empty($this->options['valid-feedback']) ? "<div class=\"valid-feedback\">{$this->options['valid-feedback']}</div>":'') .
                         (!empty($this->options['invalid-feedback']) ? "<div class=\"invalid-feedback\">{$this->options['invalid-feedback']}</div>":'') . 
                         "</div>";
